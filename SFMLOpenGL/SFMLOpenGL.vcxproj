@@ -70,8 +70,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir);$(GLM_SDK);$(GLEW_SDK)\include;$(SFML_SDK)\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(GLEW_SDK)\lib\Release\Win32;$(SFML_SDK)\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\glew-1.13.0\include;C:\SFML-2.3.2\include;$(ProjectDir);$(GLM_SDK);$(GLEW_SDK)\include;$(SFML_SDK)\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\glew-1.13.0\lib\Release\Win32;C:\SFML-2.3.2\lib;$(GLEW_SDK)\lib\Release\Win32;$(SFML_SDK)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -157,7 +157,10 @@
     <ClInclude Include="Cube.h" />
     <ClInclude Include="Debug.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="Goal.h" />
     <ClInclude Include="Matrix3.h" />
+    <ClInclude Include="NPC.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Vector3.h" />
   </ItemGroup>
@@ -168,6 +171,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />
+    <None Include="Assets\Textures\cube.pdn" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\Textures\coordinates.tga" />
+    <Image Include="Assets\Textures\cube.png" />
+    <Image Include="Assets\Textures\cube.tga" />
+    <Image Include="Assets\Textures\grid.tga" />
+    <Image Include="Assets\Textures\grid_wip.tga" />
+    <Image Include="Assets\Textures\minecraft.tga" />
+    <Image Include="Assets\Textures\texture.tga" />
+    <Image Include="Assets\Textures\texture_2.tga" />
+    <Image Include="Assets\Textures\uvtemplate.tga" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,5 +1,10 @@
 #include <Game.h>
 #include <Cube.h>
+#include <Player.h>
+#include <NPC.h>
+#include <Goal.h>
+
+
 
 GLuint	vsid,		// Vertex Shader ID
 		fsid,		// Fragment Shader ID
@@ -14,23 +19,30 @@ GLuint	vsid,		// Vertex Shader ID
 		uvID,		// UV ID
 		mvpID;		// Model View Projection ID
 
-//const string filename = "coordinates.tga";
-//const string filename = "cube.tga";
-//const string filename = "grid.tga";
-const string filename = "grid_wip.tga";
-//const string filename = "minecraft.tga";
-//const string filename = "texture.tga";
-//const string filename = "texture_2.tga";
-//const string filename = "uvtemplate.tga";
+//const string filename = ".//Assets//Textures//coordinates.tga";
+//const string filename = ".//Assets//Textures//cube.tga";
+//const string filename = ".//Assets//Textures//grid.tga";
+const string filename = ".//Assets//Textures//grid_wip.tga";
+//const string filename = ".//Assets//Textures//minecraft.tga";
+//const string filename = ".//Assets//Textures//texture.tga";
+//const string filename = ".//Assets//Textures//texture_2.tga";
+//const string filename = ".//Assets//Textures//uvtemplate.tga";
 
 
 int width;			// Width of texture
 int height;			// Height of texture
 int comp_count;		// Component of texture
 
+const int maxCubes = 6;
+
+Player m_player;
+NPC m_npc[maxCubes];
+//Goal m_goal;
+
 unsigned char* img_data;		// image data
 
-mat4 mvp, projection, view, model;			// Model View Projection
+glm::mat4 mvp, projection, view, model;	// Model View Projection
+
 
 Game::Game() : 
 	window(VideoMode(800, 600), 
@@ -69,29 +81,60 @@ void Game::run()
 				isRunning = false;
 			}
 
-			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-			{
-				// Set Model Rotation
-				model = rotate(model, 0.01f, glm::vec3(0, 1, 0)); // Rotate
-			}
+			//else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+			//{
+			//	// Set Model Rotation
+			//	model = glm::rotate(model, 0.01f, glm::vec3(0, 1, 0)); // Rotate
+			//}
+			//
+			//else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+			//{
+			//	// Set Model Rotation
+			//	model = glm::rotate(model, -0.01f, glm::vec3(0, 1, 0)); // Rotate
+			//}
+			//
+			//else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+			//{
+			//	// Set Model Rotation
+			//	model = glm::rotate(model, -0.01f, glm::vec3(1, 0, 0)); // Rotate
+			//}
+			//
+			//else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+			//{
+			//	// Set Model Rotation
+			//	model = glm::rotate(model, 0.01f, glm::vec3(1, 0, 0)); // Rotate
+			//}
 
-			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-			{
-				// Set Model Rotation
-				model = rotate(model, -0.01f, glm::vec3(0, 1, 0)); // Rotate
-			}
+			////
+			//else if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+			//{
+			//	//
+			//	model = glm::translate(model, glm::vec3(0, 0, -0.1));
+			//}
+			////
+			//else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+			//{
+			//	//
+			//	model = glm::translate(model, glm::vec3(0, 0, 0.1));
+			//}
+			////
+			//else if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+			//{
+			//	//
+			//	model = glm::translate(model, glm::vec3(-0.1, 0, 0));
+			//}
+			////
+			//else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+			//{
+			//	//
+			//	model = glm::translate(model, glm::vec3(0.1, 0, 0));
+			//}
+			
+			m_player.MovePlayer();
+			m_player.BoundaryCheck();
 
-			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
-			{
-				// Set Model Rotation
-				model = rotate(model, -0.01f, glm::vec3(1, 0, 0)); // Rotate
-			}
 
-			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
-			{
-				// Set Model Rotation
-				model = rotate(model, 0.01f, glm::vec3(1, 0, 0)); // Rotate
-			}
+
 		}
 		update();
 		render();
@@ -108,13 +151,23 @@ void Game::initialize()
 {
 	isRunning = true;
 	GLint isCompiled = 0;
-	GLint isLinked = 0;
+	GLint isLinked = 0;  
 
 	glewInit();
 
 	//Copy UV's to all faces
 	for (int i = 1; i < 6; i++)
 		memcpy(&uvs[i * 4 * 2], &uvs[0], 2 * 4 * sizeof(GLfloat));
+
+	//
+	m_player.initialize();
+	//
+	for (int i = 0; i < maxCubes; i++)
+	{
+		m_npc[i].initialize();
+	}
+	//
+	//m_goal.initialize();
 
 	DEBUG_MSG(glGetString(GL_VENDOR));
 	DEBUG_MSG(glGetString(GL_RENDERER));
@@ -123,10 +176,10 @@ void Game::initialize()
 	glGenVertexArrays(1, &vao); //Gen Vertex Array
 	glBindVertexArray(vao);
 
-	glGenBuffers(1, &vbo); //Gen Vertex Buffer
+	glGenBuffers(1, &vbo);		//Gen Vertex Buffer
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-	//Vertices 3 x,y,z , Colors 4 RGBA, UV/ST 2
+	//Vertices (3) x,y,z , Colors (4) RGBA, UV/ST (2)
 	glBufferData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS) + (2 * UVS)) * sizeof(GLfloat), NULL, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &vib); //Gen Vertex Index Buffer
@@ -259,14 +312,14 @@ void Game::initialize()
 	//Bind to OpenGL
 	//https://www.khronos.org/opengles/sdk/docs/man/xhtml/glTexImage2D.xml
 	glTexImage2D(
-		GL_TEXTURE_2D,		//2D Texture Image
-		0,					//Mipmapping Level 
-		GL_RGBA,			//GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA, GL_RGB, GL_BGR, GL_RGBA 
-		width,				//Width
-		height,				//Height
-		0,					//Border
-		GL_RGBA,			//Bitmap
-		GL_UNSIGNED_BYTE,	//Specifies Data type of image data
+		GL_TEXTURE_2D,			//2D Texture Image
+		0,						//Mipmapping Level 
+		GL_RGBA,				//GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA, GL_RGB, GL_BGR, GL_RGBA 
+		width,					//Width
+		height,					//Height
+		0,						//Border
+		GL_RGBA,				//Bitmap
+		GL_UNSIGNED_BYTE,		//Specifies Data type of image data
 		img_data				//Image Data
 		);
 
@@ -279,7 +332,7 @@ void Game::initialize()
 	mvpID = glGetUniformLocation(progID, "sv_mvp");
 
 	// Projection Matrix 
-	projection = perspective(
+	projection = glm::perspective(
 		45.0f,					// Field of View 45 degrees
 		4.0f / 3.0f,			// Aspect ratio
 		5.0f,					// Display Range Min : 0.1f unit
@@ -287,16 +340,25 @@ void Game::initialize()
 		);
 
 	// Camera Matrix
-	view = lookAt(
-		vec3(0.0f, 4.0f, 10.0f),	// Camera (x,y,z), in World Space
-		vec3(0.0f, 0.0f, 0.0f),	// Camera looking at origin
-		vec3(0.0f, 1.0f, 0.0f)	// 0.0f, 1.0f, 0.0f Look Down and 0.0f, -1.0f, 0.0f Look Up
+	view = glm::lookAt(
+		glm::vec3(0.0f, 4.0f, 10.0f),	// Camera (x,y,z), in World Space
+		glm::vec3(0.0f, 0.0f, 0.0f),		// Camera looking at origin
+		glm::vec3(0.0f, 1.0f, 0.0f)		// 0.0f, 1.0f, 0.0f Look Down and 0.0f, -1.0f, 0.0f Look Up
 		);
 
 	// Model matrix
-	model = mat4(
+	model = glm::mat4(
 		1.0f					// Identity Matrix
 		);
+
+	//
+	for (int i = 0 ; i < maxCubes; i++)
+	{
+		m_npc[i].startCubePosition(i);
+	}
+	//
+	m_goal.setGoal();
+
 
 	// Enable Depth Test
 	glEnable(GL_DEPTH_TEST);
@@ -310,7 +372,20 @@ void Game::update()
 	DEBUG_MSG("Updating...");
 #endif
 	// Update Model View Projection
-	mvp = projection * view * model;
+	//mvp = projection * view * m_player.getPosition();
+	//
+	m_player.PlayerJumping();
+
+	//
+	for (int i = 0; i < maxCubes; i++)
+	{
+		m_npc[i].MoveCube();
+		m_npc[i].NPCBoundaryCheck();
+	}
+	//
+	//m_goal.MoveGoal();
+	//m_goal.GoalBoundary();
+
 }
 
 void Game::render()
@@ -340,6 +415,16 @@ void Game::render()
 	glVertexAttribPointer(colorID, 4, GL_FLOAT, GL_FALSE, 0, (VOID*)(3 * VERTICES * sizeof(GLfloat)));
 	glVertexAttribPointer(uvID, 2, GL_FLOAT, GL_FALSE, 0, (VOID*)(((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat)));
 	
+	//
+	generateCube(m_player.getModel());
+	//
+	for (int i = 0; i < maxCubes; i++)
+	{
+		generateCube(m_npc[i].getModelN());
+	}
+	//
+	//generateCube(m_goal.getModelG());
+
 	//Enable Arrays
 	glEnableVertexAttribArray(positionID);
 	glEnableVertexAttribArray(colorID);
@@ -367,3 +452,34 @@ void Game::unload()
 	stbi_image_free(img_data);		//Free image
 }
 
+//
+void Game::generateCube(glm::mat4 & m_model)
+{
+
+	mvp = projection * view * m_model;
+	//VBO Data....vertices, colors and UV's appended
+	glBufferSubData(GL_ARRAY_BUFFER, 0 * VERTICES * sizeof(GLfloat), 3 * VERTICES * sizeof(GLfloat), vertices);
+	glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), colors);
+	glBufferSubData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat), 2 * UVS * sizeof(GLfloat), uvs);
+
+	// Send transformation to shader mvp uniform
+	glUniformMatrix4fv(mvpID, 1, GL_FALSE, &mvp[0][0]);
+
+	//Set Active Texture .... 32
+	glActiveTexture(GL_TEXTURE0);
+	glUniform1i(textureID, 0);
+
+	//Set pointers for each parameter (with appropriate starting positions)
+	//https://www.khronos.org/opengles/sdk/docs/man/xhtml/glVertexAttribPointer.xml
+	glVertexAttribPointer(positionID, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(colorID, 4, GL_FLOAT, GL_FALSE, 0, (VOID*)(3 * VERTICES * sizeof(GLfloat)));
+	glVertexAttribPointer(uvID, 2, GL_FLOAT, GL_FALSE, 0, (VOID*)(((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat)));
+
+	//Enable Arrays
+	glEnableVertexAttribArray(positionID);
+	glEnableVertexAttribArray(colorID);
+	glEnableVertexAttribArray(uvID);
+
+	//Draw Element Arrays
+	glDrawElements(GL_TRIANGLES, 3 * INDICES, GL_UNSIGNED_INT, NULL);
+}

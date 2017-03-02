@@ -23,7 +23,7 @@ http://www.sfml-dev.org/files/SFML-2.3.2-windows-vc14-32-bit.zip "SFML-2.3.2-win
 * Download GLM Math Library from https://github.com/g-truc/glm/tags
 * Set environment variable for GLM
 	* Follow this guide https://support.microsoft.com/en-us/kb/310519
-	* Alternatively `SET GLM_SDK="C:\Users\#####\glm-0.9.7.2\glm\glm"`
+	* Alternatively `SET GLM_SDK="C:\Users\#####\glm-0.9.7.2"`
 * Select a project default target `x86` when running executable
 * If the project builds but does not `xcopy` the required dll's try moving your project to a directory you have full access to, see http://tinyurl.com/SFMLStarter for a guide on post build events.
 
@@ -43,6 +43,13 @@ http://www.sfml-dev.org/files/SFML-2.3.2-windows-vc14-32-bit.zip "SFML-2.3.2-win
 * Change to the project directory `cd projects gameplay-programming-i-lab11`
 
 * List files that were downloaded `ls`
+
+### Installation and Environment Notes ###
+* OpenGL runtime DLL's ( `opengl32.dll` and `glu32.dll`) are located within `C:\Windows\System32` directory on 32-bit and `C:\Windows\SysWOW64` directory on 64-bit
+
+* Header files for GLUT (avoid GLUT use GLEW http://stackoverflow.com/questions/15613978/difference-of-freeglut-vs-glew) `GL.h` and `GLU.h` are located in `C:\Program Files\Microsoft SDKs\Windows\v7.1A\Include` on 32 bit `C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include` on 64-bit
+
+* Linker library files `OpenGL32.lib` and `GlU32.lib` are located in `C:\Program Files\Microsoft SDKs\Windows\v7.1A\Lib` on 32-bit `C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Lib` on 64-bit
 
 ### Who do I talk to? ###
 

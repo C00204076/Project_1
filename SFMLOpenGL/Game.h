@@ -2,6 +2,7 @@
 #define GAME_H
 
 #include <iostream>
+#include <vector>
 #include <GL/glew.h>
 #include <GL/wglew.h>
 
@@ -18,7 +19,6 @@
 
 using namespace std;
 using namespace sf;
-using namespace glm;
 
 class Game
 {
@@ -34,6 +34,8 @@ private:
 	void update();
 	void render();
 	void unload();
+	void generateCube(glm::mat4 & m_model);
+
 };
 
 #endif
